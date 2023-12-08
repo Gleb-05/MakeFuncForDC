@@ -7,9 +7,13 @@ data = {
     7: "4 2 1",
     8: "4 2",
     9: "4 3 1",
-    10: "4 3 1",
-    11: "4 3 2",
-    12: "4 3 2"
+    #10: "4 3 1",
+    #11: "4 3 2",
+    #12: "4 3 2",
+    10: "1",
+    11: "2",
+    12: "2",
+    # mask is smart enough to ignore residue elements
 }
 
 def make_mask(n):
@@ -29,15 +33,12 @@ def use_mask(word, mask):
 table = {}
 
 for c in data:
-    if data[c] in table:
-        table[data[c]].append(c)
-        continue
     z = data[c].split()
     for mask in make_mask(len(z)):
         mz = ' '.join(use_mask(z, mask))
-        if mz in table:
-            table[mz].append(c)
+        if mz not in table:
+            table[mz] = [c]
             continue
-        table[mz] = [c]
+        table[mz].append(c)
 
 print(table)
