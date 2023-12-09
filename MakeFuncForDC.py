@@ -7,14 +7,15 @@ data = {
     7: "4 2 1",
     8: "4 2",
     9: "4 3 1",
-    #10: "4 3 1",
-    #11: "4 3 2",
-    #12: "4 3 2",
-    10: "1",
-    11: "2",
-    12: "2",
+    10: "4 3 1",
+    11: "4 3 2",
+    12: "4 3 2",
+    # 10: "1",
+    # 11: "2",
+    # 12: "2",
     # mask is smart enough to ignore residue elements
 }
+
 
 def make_mask(n):
     mask = []
@@ -42,3 +43,25 @@ for c in data:
         table[mz].append(c)
 
 print(table)
+
+
+def cleaned(table):
+    return {key: val for key, val in table.items() if len(val) > 1}
+
+table = cleaned(table)
+print(table)
+
+
+def LEn(terms_n):
+    return 1 + (terms_n - 2) // 2
+
+ro_table = {}
+
+for z_intersectn in table:
+    ro_table[z_intersectn] = len(z_intersectn.split()) * len(table[z_intersectn]) / LEn(len(table[z_intersectn]))
+    
+print(ro_table)
+
+
+answer = {1: [],2: [], 3: [], 4: []}
+
