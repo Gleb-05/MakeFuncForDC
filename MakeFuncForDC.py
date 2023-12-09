@@ -121,4 +121,24 @@ while True:
 
 for z in z_bundles:
     print("  function", z, "used bundles:", z_bundles[z])
-print("With", bundled_LEn, "logical elements used\n")    
+print("With", bundled_LEn, "logical elements used\n")
+
+
+def plainLEn(raw_z_data):
+    total = 0
+    for z in raw_z_data:
+        terms = raw_z_data[z].split();
+        total += LEn(len(terms))
+    return total
+
+def totalLEn(raw_z_data, z_bundles, bundled_LEn):
+    total = bundled_LEn
+    for z in raw_z_data:
+        terms = raw_z_data[z].split()
+        for bundle in z_bundles[z]:
+            terms = [c for c in terms if c not in bundle]
+        total += LEn(len(terms) + len(z_bundles[z]))
+    return total
+
+print("Total LE solution cost:", totalLEn(raw_z_data, z_bundles, bundled_LEn),
+      "\nOriginal cost:", plainLEn(raw_z_data), "\n")
