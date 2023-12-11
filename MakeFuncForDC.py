@@ -4,13 +4,26 @@ import random
 # raw data
 #   function "z" : its "c" terms
 raw_z_data = {
-    "4": "5 6 7 8 9 10 11 12",
-    "3": "1 2 3 4 9 10 11 12",
-    "2": "0 3 4 7 8 11 12 15",
-    "1": "2 4 7 9 10 14",
+    "4": "5 6 7 8 9 10 11 12".split(),
+    "3": "1 2 3 4 9 10 11 12".split(),
+    "2": "0 3 4 7 8 11 12 15".split(),
+    "1": "2 4 7 9 10 14".split(),
     }
 
-print("functions z and terms c that define them\n", raw_z_data, "\n")
+def random_z(DC_c_cap):
+    z = [i for i in range(DC_c_cap)]
+    for c in range(DC_c_cap // 2):
+        z.pop(random.randint(0,len(z)-1))
+    return z
+
+# Test the limits
+for z in raw_z_data:
+    raw_z_data[z] = random_z(120)
+
+print("functions z and terms c that define them")
+for z in raw_z_data:
+    print(raw_z_data[z])
+print()
 
 
 def cleaned(table):
@@ -22,7 +35,7 @@ def cleaned(table):
 def prepare(raw_z_data):
     data = {}
     for z in raw_z_data:
-        for c in raw_z_data[z].split():
+        for c in raw_z_data[z]:
             if c not in data:
                 data[c] = [z]
             else:
@@ -98,43 +111,61 @@ def update_data(data, used_z, bundle):
         else:
             data[c] = residue_z
     data = cleaned(data)
-    
+
+bundled_count = 0
 bundled_LEn = 0
 
+debug = False
 # greedy loop
 while True:
     if len(data) < 2:
+        print("---one or no z remains, nothing to pair with, exit\n")
         break
     table = make_z_intersection_table(data)
     if len(table) < 1:
+        print("---c no longer repeat across z, no possible pairs, exit\n")
         break
     ro_table = make_density_table(table)
     used_z = random_max_z_from(ro_table)
     bundle = table[used_z]
     
-    bundled_LEn += 1
+    bundled_count += 1
+    bundled_LEn += LEn(len(bundle))
     for z in used_z.split():
         z_bundles[z].append(bundle)
     
     update_data(data, used_z, bundle)
+    if (debug):
+        print("z_intersection_table: \n", table)
+        print("density_table: \n", ro_table)
+        print("===\nbundle", bundle, "for", used_z, "\n===")
+        print("updated data:\n", data)
+        print("===Bundles", bundled_count)
+        print("===UsedLE", bundled_LEn)
+        print()
 
 
 for z in z_bundles:
-    print("  function", z, "used bundles:", z_bundles[z])
-print("With", bundled_LEn, "logical elements used\n")
+    print("> function", z, "used bundles:", z_bundles[z])
+print("With", bundled_count, "bundles and", bundled_LEn, "logical elements used\n")
 
+for z in z_bundles:
+    common_c = [c for bundle in z_bundles[z] for c in bundle]
+    uncommon_c = [c for c in raw_z_data[z] if c not in common_c]
+    print ("> function", z, "uncommon terms, outside the bundles:\n", uncommon_c)
+print()
 
 def plainLEn(raw_z_data):
     total = 0
     for z in raw_z_data:
-        terms = raw_z_data[z].split();
+        terms = raw_z_data[z]
         total += LEn(len(terms))
     return total
 
 def totalLEn(raw_z_data, z_bundles, bundled_LEn):
     total = bundled_LEn
     for z in raw_z_data:
-        terms = raw_z_data[z].split()
+        terms = raw_z_data[z]
         for bundle in z_bundles[z]:
             terms = [c for c in terms if c not in bundle]
         total += LEn(len(terms) + len(z_bundles[z]))
