@@ -19,7 +19,7 @@ def random_z(DC_c_cap):
 
 # Test the limits
 for z in raw_z_data:
-    raw_z_data[z] = random_z(64)
+    #raw_z_data[z] = random_z(64)
     continue
     
 
@@ -151,19 +151,28 @@ def makeDCfunc(raw_z_data):
             z_bundles[z].append(bundle)
     
         update_data(data, used_z, bundle)
-        print("density_table: \n", ro_table)
+        print("===\nbundle", bundle, "for", used_z, "\n===")
         if (debug_tables):
             print("z_intersection_table: \n", table)
-            print("===\nbundle", bundle, "for", used_z, "\n===")
+            print("density_table: \n", ro_table)
             print("updated data:\n", data)
             print("===Bundles", bundled_count)
             print("===UsedLE", bundled_LEn)
             print()
-            
+        
+        # break recursion
+        if (bundled_count <= 1 and ro_table[used_z] <= 4.0):
+            print("---break recursion on trivial density\n")
+            bundled_count = -1
+            break
+
+
     finalLEcost = 0
     raw_super_z_data = {"4":[], "3":[], "2":[], "1":[]}
     
-    if (bundled_count > 0):
+    if (bundled_count <= 0):
+        finalLEcost = totalLEn(raw_z_data, z_bundles, bundled_LEn)
+    else:
         for z in z_bundles:
             print("> function", z, "used bundles:", z_bundles[z])
         print("With", bundled_count, "bundles and", bundled_LEn, "logical elements used\n")
@@ -180,9 +189,6 @@ def makeDCfunc(raw_z_data):
         
         finalLEcost = bundled_LEn + makeDCfunc(raw_super_z_data)
         
-    else:
-        print("No terms could be bundled\n")
-        finalLEcost = totalLEn(raw_z_data, z_bundles, bundled_LEn)
 
 
     print("Total LE solution cost:", finalLEcost,
