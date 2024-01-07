@@ -1,5 +1,8 @@
 import random
 
+debug_greedy_loop = False
+
+show_uncommons = False
 
 # raw data
 #   function "z" : its "c" terms
@@ -16,9 +19,11 @@ def random_z(DC_c_cap):
         z.pop(random.randint(0,len(z)-1))
     return z
 
+make_larger_functions = False
 # Test the limits
 for z in raw_z_data:
-    raw_z_data[z] = random_z(120)
+    if make_larger_functions:
+        raw_z_data[z] = random_z(120)
 
 print("functions z and terms c that define them")
 for z in raw_z_data:
@@ -43,6 +48,7 @@ def prepare(raw_z_data):
     return data
 
 
+# greedy data
 data = cleaned(prepare(raw_z_data))
 print("terms c and functions z where they are used\n", data, "\n")
 
@@ -115,7 +121,6 @@ def update_data(data, used_z, bundle):
 bundled_count = 0
 bundled_LEn = 0
 
-debug = False
 # greedy loop
 while True:
     if len(data) < 2:
@@ -135,7 +140,7 @@ while True:
         z_bundles[z].append(bundle)
     
     update_data(data, used_z, bundle)
-    if (debug):
+    if (debug_greedy_loop):
         print("z_intersection_table: \n", table)
         print("density_table: \n", ro_table)
         print("===\nbundle", bundle, "for", used_z, "\n===")
@@ -152,7 +157,8 @@ print("With", bundled_count, "bundles and", bundled_LEn, "logical elements used\
 for z in z_bundles:
     common_c = [c for bundle in z_bundles[z] for c in bundle]
     uncommon_c = [c for c in raw_z_data[z] if c not in common_c]
-    print ("> function", z, "uncommon terms, outside the bundles:\n", uncommon_c)
+    if show_uncommons:
+        print ("> function", z, "uncommon terms, outside the bundles:\n", uncommon_c)
 print()
 
 def plainLEn(raw_z_data):
