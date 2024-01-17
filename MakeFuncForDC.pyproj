@@ -4,13 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>4ea8c61b-5065-4878-9a06-c023fb83c01b</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>MakeFuncForDC.py</StartupFile>
+    <StartupFile>BruteForce.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>MakeFuncForDC</Name>
     <RootNamespace>MakeFuncForDC</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,6 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BruteForce.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MakeFuncForDC.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
