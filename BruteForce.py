@@ -45,13 +45,6 @@ for leN in range(LEn_k(m,k), LEn_k(m,2)+1):
 
 print("number of used up LEs and corresponding configurations for their inputs: ", LEk_configs)
 
-# for leN_group in LEk_configs:
-#     for k_config in leN_group:
-k_config = LEk_configs[4][0]
-k_config_permutations = unique_permutations(k_config)
-print("permutations for most efficient configuration:")
-for config in k_config_permutations:
-    print(config)    
 
 def define_LE_positions_for_(one_config_permutation, raw_z_func):
     permutation = [x+1 for x in one_config_permutation]
@@ -90,7 +83,16 @@ def define_LE_positions_for_(one_config_permutation, raw_z_func):
     for cover in func_covers:
         print(cover)
     print()
+    
 
-
-for one_config_permutation in k_config_permutations:
-    define_LE_positions_for_(one_config_permutation, raw_z_func)
+for leN_group in LEk_configs:
+    for k_config in LEk_configs[leN_group]:
+        k_config_permutations = unique_permutations(k_config)
+        
+        print(f"permutations for configuration with {leN_group} LEs:")
+        for config in k_config_permutations:
+            print(config)
+        print()
+         
+        for one_config_permutation in k_config_permutations:
+            define_LE_positions_for_(one_config_permutation, raw_z_func)
