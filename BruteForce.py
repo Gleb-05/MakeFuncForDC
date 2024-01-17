@@ -51,43 +51,46 @@ k_config = LEk_configs[4][0]
 k_config_permutations = unique_permutations(k_config)
 print("permutations for most efficient configuration:")
 for config in k_config_permutations:
-    print(config)
-    
-# for one_config_permutation in k_config_permutations:
-#     permutation = [x+1 for x in one_config_permutation]
-permutation = [x+1 for x in k_config_permutations[3]]
-print("selected permutation of k configuration")
-print(permutation)
+    print(config)    
 
-init_k = permutation[0]
-func_covers = [[raw_z_func[:init_k]] + raw_z_func[init_k:]]
+def define_LE_positions_for_(one_config_permutation, raw_z_func):
+    permutation = [x+1 for x in one_config_permutation]
+    print("selected permutation of k configuration")
+    print(permutation)
 
-for ki in range(1,len(permutation)):
-    k = permutation[ki]
+    init_k = permutation[0]
+    func_covers = [[raw_z_func[:init_k]] + raw_z_func[init_k:]]
+
+    for ki in range(1,len(permutation)):
+        k = permutation[ki]
     
-    at = 1
-    i_at = (len(func_covers) + 1) // 2
+        at = 1
+        i_at = (len(func_covers) + 1) // 2
     
-    for i in range(len(func_covers)):
-        cover = func_covers[i]
+        for i in range(len(func_covers)):
+            cover = func_covers[i]
         
-        if ki == len(permutation) - 1:
-            if len(cover) != k:
-                print("UNEXPECTED number of terms in", cover)
-            break
+            if ki == len(permutation) - 1:
+                if len(cover) != k:
+                    print("UNEXPECTED number of terms in", cover)
+                break
         
-        # 'stay' is 0
-        func_covers[i] = [cover[:k]] + cover[k:]
-        # 'stay' is 1
-        if (i == i_at):
-            i_at += (i_at + 1) // 2
-            at += 1
-        # ignore cover if k implies terms out of bounds
-        if (at+k <= len(cover)):
-            func_covers.append(cover[:at] + [cover[at:at+k]] + cover[at+k:])
+            # 'stay' is 0
+            func_covers[i] = [cover[:k]] + cover[k:]
+            # 'stay' is 1
+            if (i == i_at):
+                i_at += (i_at + 1) // 2
+                at += 1
+            # ignore cover if k implies terms out of bounds
+            if (at+k <= len(cover)):
+                func_covers.append(cover[:at] + [cover[at:at+k]] + cover[at+k:])
 
 
-print("all possible LE positions for selected permutation of one configuration")
-for cover in func_covers:
-    print(cover)
-print()
+    print("all possible LE positions for selected permutation of one configuration")
+    for cover in func_covers:
+        print(cover)
+    print()
+
+
+for one_config_permutation in k_config_permutations:
+    define_LE_positions_for_(one_config_permutation, raw_z_func)
