@@ -1,5 +1,8 @@
 import random
 
+# number of LE inputs
+k = 3
+
 debug_greedy_loop = False
 
 show_uncommons = False
@@ -25,10 +28,13 @@ for z in raw_z_data:
     if make_larger_functions:
         raw_z_data[z] = random_z(120)
 
+def table_print(table):
+    for row in table:
+        print(f"{str(row).center(3)}: {table[row]}")
+    print()
+    
 print("functions z and terms c that define them")
-for z in raw_z_data:
-    print(raw_z_data[z])
-print()
+table_print(raw_z_data)
 
 
 def cleaned(table):
@@ -50,7 +56,8 @@ def prepare(raw_z_data):
 
 # greedy data
 data = cleaned(prepare(raw_z_data))
-print("terms c and functions z where they are used\n", data, "\n")
+print("terms c and functions z where they are used")
+table_print(data)
 
 def make_mask(n):
     mask = []
@@ -80,7 +87,7 @@ def make_z_intersection_table(data):
 
 # L-ogical E-lement n-umber - count of LE needed to cover n terms
 def LEn(terms_n):
-    return 1 + (terms_n - 2) // 2
+    return 1 + (terms_n - 2) // (k - 1)
 
 # greedy property
 #   density - how many terms are covered across functions at expense of how many LE
@@ -92,7 +99,7 @@ def make_density_table(table):
     return {key: density(key, val) for key, val in table.items()}
 
 
-z_bundles = {"4": [], "3": [], "2": [], "1": []}
+z_bundles = {str(n): [] for n in range(len(raw_z_data), 0, -1)}
 
 # greedy pick
 def random_max_z_from(ro_table):
@@ -140,6 +147,7 @@ while True:
         z_bundles[z].append(bundle)
     
     update_data(data, used_z, bundle)
+    
     if (debug_greedy_loop):
         print("z_intersection_table: \n", table)
         print("density_table: \n", ro_table)
