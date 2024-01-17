@@ -31,6 +31,10 @@ raw_z_func = "5 6 7 8 9 10 11 12".split()
 m = len(raw_z_func)
 k = 3
 
+# def LEn_k(terms_n, k):
+#     return 1 + (terms_n - 2) // (k - 1)
+
+
 # https://stackoverflow.com/questions/26812803/find-all-possible-combinations-partitions-of-2-numbers-for-a-given-number
 from itertools import combinations_with_replacement
 
@@ -41,14 +45,17 @@ for leN in range(4,7+1):
 
 print("number of used up LEs and corresponding configurations for their inputs: ", LEk_configs)
 
+# for leN_group in LEk_configs:
+#     for k_config in leN_group:
 k_config = LEk_configs[4][0]
 k_config_permutations = unique_permutations(k_config)
 print("permutations for most efficient configuration:")
 for config in k_config_permutations:
     print(config)
     
-
-permutation = [x+1 for x in k_config_permutations[0]]
+# for one_config_permutation in k_config_permutations:
+#     permutation = [x+1 for x in one_config_permutation]
+permutation = [x+1 for x in k_config_permutations[3]]
 print("selected permutation of k configuration")
 print(permutation)
 
@@ -75,9 +82,12 @@ for ki in range(1,len(permutation)):
         if (i == i_at):
             i_at += (i_at + 1) // 2
             at += 1
-        func_covers.append(cover[:at] + [cover[at:at+k]] + cover[at+k:])
+        # ignore cover if k implies terms out of bounds
+        if (at+k <= len(cover)):
+            func_covers.append(cover[:at] + [cover[at:at+k]] + cover[at+k:])
 
 
 print("all possible LE positions for selected permutation of one configuration")
 for cover in func_covers:
     print(cover)
+print()
