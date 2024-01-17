@@ -1,4 +1,5 @@
 from itertools import combinations_with_replacement
+import math
 
 # https://stackoverflow.com/questions/12836385/how-can-i-interleave-or-create-unique-permutations-of-two-strings-without-recur/12837695#12837695
 def unique_permutations(seq):
@@ -10,7 +11,7 @@ def unique_permutations(seq):
     
     while True:
         ans.append(seq[:])
-        
+
         for k in k_indices:
             if seq[k] < seq[k + 1]:
                 break
@@ -25,14 +26,33 @@ def unique_permutations(seq):
 
         (seq[k], seq[i]) = (seq[i], seq[k])
         seq[k + 1:] = seq[-1:k:-1]
-        
-def define_LE_positions_for_(one_config_permutation, raw_z_func):
+
+template_debug = False
+
+def substitute_values(nested_list, values):
+    index = 0
+
+    def substitute_recursively(lst):
+        nonlocal index
+        result = []
+        for item in lst:
+            if isinstance(item, list):
+                result.append(substitute_recursively(item))
+            else:
+                result.append(values[index])
+                index += 1
+        return result
+
+    return substitute_recursively(nested_list)
+
+def define_LE_positions_for_(one_config_permutation, z_func):
     permutation = [x+1 for x in one_config_permutation]
-    print("selected permutation of k configuration")
-    print(permutation)
+    if template_debug:
+        print("selected permutation of k configuration")
+        print(permutation)
 
     init_k = permutation[0]
-    func_covers = [[raw_z_func[:init_k]] + raw_z_func[init_k:]]
+    func_covers = [[z_func[:init_k]] + z_func[init_k:]]
 
     for ki in range(1,len(permutation)):
         k = permutation[ki]
@@ -58,19 +78,20 @@ def define_LE_positions_for_(one_config_permutation, raw_z_func):
             if (at+k <= len(cover)):
                 func_covers.append(cover[:at] + [cover[at:at+k]] + cover[at+k:])
 
+    if template_debug:
+        print("all possible LE positions for selected permutation of one configuration")
+        for cover in func_covers:
+            print(cover)
+        print()
+    return func_covers
 
-    print("all possible LE positions for selected permutation of one configuration")
-    for cover in func_covers:
-        print(cover)
-    print()
-    
+
 k = 3
 
-def define_func_covers(raw_z_func):
+
+def define_template_covers(m):
     def LEn_k(terms_n, k):
         return 1 + (terms_n - 2) // (k - 1)
-
-    m = len(raw_z_func)
 
     LEk_configs = {}
 
@@ -79,21 +100,48 @@ def define_func_covers(raw_z_func):
     for leN in range(LEn_k(m,k), LEn_k(m,2)+1):
         LEk_configs[leN] = [list(x) for x in combinations_with_replacement(range(1,k), leN) if sum(x) == m-1]
 
-    print("number of used up LEs and corresponding configurations for their inputs: ", LEk_configs)
+    print(f"For k={k} and m={m}, see number of used up LEs, and corresponding configurations showing 'input_N - 1' for them")
+    for leN_group in LEk_configs:
+        print(leN_group, ":", LEk_configs[leN_group])
 
+    template_covers = []
+    
     for leN_group in LEk_configs:
         for k_config in LEk_configs[leN_group]:
             k_config_permutations = unique_permutations(k_config)
-        
-            print(f"permutations for configuration with {leN_group} LEs:")
-            for config in k_config_permutations:
-                print(config)
-            print()
+            
+            if template_debug:
+                print(f"permutations for configuration with {leN_group} LEs:")
+                for config in k_config_permutations:
+                    print(config)
+                print()
          
             for one_config_permutation in k_config_permutations:
-                define_LE_positions_for_(one_config_permutation, raw_z_func)
-            
+                covers_for_permutation = define_LE_positions_for_(one_config_permutation, [c for c in range(m)])
+                template_covers.extend(covers_for_permutation)
+    
+    return template_covers
 
+
+def define_func_covers(raw_z_func):
+    print(f"Definition for ALL covers for {raw_z_func} function STARTED")
+    m = len(raw_z_func)
+    print("Expected", math.factorial(m), "to be done")
+    template_covers = define_template_covers(m)
+    
+    func_covers = []
+
+    active_counter = 0
+    # for all unique permutations, substitute values in template covers
+    for constituent_permutation in unique_permutations(raw_z_func):
+        active_counter += 1
+        if active_counter%1000 == 0:
+            print("Done", active_counter)
+        func_covers.extend([substitute_values(template, constituent_permutation) for template in template_covers])
+    
+    print("Actual", active_counter, "done")
+    return func_covers
+    
+        
 raw_z_func = "5 6 7 8 9 10 11 12".split()
 define_func_covers(raw_z_func)
-
