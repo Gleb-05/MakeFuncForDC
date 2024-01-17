@@ -31,8 +31,8 @@ raw_z_func = "5 6 7 8 9 10 11 12".split()
 m = len(raw_z_func)
 k = 3
 
-# def LEn_k(terms_n, k):
-#     return 1 + (terms_n - 2) // (k - 1)
+def LEn_k(terms_n, k):
+    return 1 + (terms_n - 2) // (k - 1)
 
 
 # https://stackoverflow.com/questions/26812803/find-all-possible-combinations-partitions-of-2-numbers-for-a-given-number
@@ -40,7 +40,7 @@ from itertools import combinations_with_replacement
 
 LEk_configs = {}
 # range from best(k'=k) to worst(k'=2) possible number of LE, LE used to cover function
-for leN in range(4,7+1):
+for leN in range(LEn_k(m,k), LEn_k(m,2)+1):
     LEk_configs[leN] = [list(x) for x in combinations_with_replacement(range(1,k), leN) if sum(x) == m-1]
 
 print("number of used up LEs and corresponding configurations for their inputs: ", LEk_configs)
