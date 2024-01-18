@@ -78,24 +78,41 @@ def signatures_for(permutation, m):
 
 
 def get_cover_by(signature, values):
+    weights = [int(x) for x in values]
     at = 0
+    
     for ki in range(len(signature)):
         k = signature[ki]
         
         if ki == len(signature) - 1:
             if len(values) != k:
                 print("UNEXPECTED number of terms in", values)
-            break
+                return
+            values = tuple(rearrange_based_on_weights(values, weights))
+            return values
         if k == 'j':
             at = 0
         else:
-            values = values[:at] + [values[at:at+k]] + values[at+k:]
+            weight_subpart = weights[at:at+k]
+            value_subpart = values[at:at+k]
+            rearranged_values = rearrange_based_on_weights(value_subpart, weight_subpart)
+            
+            values = values[:at] + [tuple(rearranged_values)] + values[at+k:]
+            weights = weights[:at] + [min(weight_subpart)] + weights[at+k:]
             at += 1
-    return values
 
+            if False:
+                print(values)
+                print(weights)
+
+def rearrange_based_on_weights(values, weights):
+    # https://stackoverflow.com/questions/6618515/sorting-list-according-to-corresponding-values-from-a-parallel-list
+    return [v for _,v in sorted(zip(weights,values))]
+#TEST
 # for signature in signatures_for([3,3,3,2], 8):
 #     print(signature)
-#     print(get_cover_by(signature, [x for x in range(8)]))
+#     print(get_cover_by(signature, [6,5,4,3,2,1,7,8]))
+#     print()
     
 
 def define_cover_signatures(m):
@@ -112,6 +129,7 @@ def define_cover_signatures(m):
     print(f"For k={k} and m={m}, see number of used up LEs, and corresponding configurations showing 'input_N - 1' for them")
     for leN_group in LEk_configs:
         print(leN_group, ":", LEk_configs[leN_group])
+    print()
 
     cover_signatures = []
 
@@ -127,15 +145,10 @@ def define_cover_signatures(m):
          
             for one_config_permutation in k_config_permutations:
                 permutation = [x+1 for x in one_config_permutation]
-                # TOO COMPLEX CHECK
-                # for signature in signatures_for_permutation:
-                #     is_unique = True
-                #     for signature_permutation in signature_permutations(signature):
-                #         if signature_permutation in cover_signatures:
-                #             is_unique = False
-                #             break
-                #     if is_unique:
                 cover_signatures.extend(signatures_for(permutation, m))
+                # Possible? Check for duplicate signatures (very few, hardly worth the while)
+                # Like 2 3 3 j 3, 3 2 3 j 3, 3 3 2 j 3.
+                # While 3 j 3 2 j 3 and 3 j 2 3 j 3 are different
     
     return cover_signatures
 
@@ -149,15 +162,21 @@ def define_func_covers(raw_z_func):
     print("Expected", math.factorial(m), "to be done")
     cover_signatures = define_cover_signatures(m)
 
-    func_covers = []
+    func_covers = set()
 
     active_counter = 0
     # for all unique permutations, construct covers by signatures
     for constituent_permutation in unique_permutations(raw_z_func):
         active_counter += 1
+        if active_counter%100 == 0:
+            print("grain done", active_counter)
         if active_counter%1000 == 0:
             print("Done", active_counter)
-        func_covers.extend([get_cover_by(signature, constituent_permutation) for signature in cover_signatures])
+            
+        for signature in cover_signatures:
+            cover = get_cover_by(signature, constituent_permutation)
+            # if isinstance(cover, list)
+            func_covers.add(cover)
     
     print("Actual", active_counter, "done")
     return func_covers
