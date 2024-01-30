@@ -1,4 +1,4 @@
-from itertools import combinations_with_replacement
+from itertools import combinations_with_replacement, product
 import math
 
 # https://stackoverflow.com/questions/12836385/how-can-i-interleave-or-create-unique-permutations-of-two-strings-without-recur/12837695#12837695
@@ -78,6 +78,7 @@ def signatures_for(permutation, m):
 
 
 def get_cover_by(signature, values):
+    groups = []
     weights = [int(x) for x in values]
     at = 0
     
@@ -88,22 +89,22 @@ def get_cover_by(signature, values):
             if len(values) != k:
                 print("UNEXPECTED number of terms in", values)
                 return
-            values = tuple(rearrange_based_on_weights(values, weights))
-            return values
+            if signatures_debug:
+                values = tuple(rearrange_based_on_weights(values, weights))
+                print(values)
+            return tuple(groups)
         if k == 'j':
             at = 0
         else:
             weight_subpart = weights[at:at+k]
             value_subpart = values[at:at+k]
-            rearranged_values = rearrange_based_on_weights(value_subpart, weight_subpart)
+            ordered_values = tuple(rearrange_based_on_weights(value_subpart, weight_subpart))
             
-            values = values[:at] + [tuple(rearranged_values)] + values[at+k:]
+            values = values[:at] + [ordered_values] + values[at+k:]
             weights = weights[:at] + [min(weight_subpart)] + weights[at+k:]
+            groups.append(ordered_values)
             at += 1
 
-            if False:
-                print(values)
-                print(weights)
 
 def rearrange_based_on_weights(values, weights):
     # https://stackoverflow.com/questions/6618515/sorting-list-according-to-corresponding-values-from-a-parallel-list
@@ -159,7 +160,6 @@ def define_cover_signatures(m):
 def define_func_covers(raw_z_func):
     print(f"Definition for ALL covers for {raw_z_func} function STARTED")
     m = len(raw_z_func)
-    print("Expected", math.factorial(m), "to be done")
     cover_signatures = define_cover_signatures(m)
 
     func_covers = set()
@@ -177,14 +177,53 @@ def define_func_covers(raw_z_func):
             cover = get_cover_by(signature, constituent_permutation)
             # if isinstance(cover, list)
             func_covers.add(cover)
+        break
     
-    print("Actual", active_counter, "done")
+    print("Done", active_counter, "with", math.factorial(m), "expected")
+    print()
     return func_covers
     
 
+raw_z_data = {
+    "4": "5 6 7 8 9 10 11 12".split(),
+    "3": "1 2 3 4 9 10 11 12".split(),
+    "2": "0 3 4 7 8 11 12 15".split(),
+    "1": "2 4 7 9 10 14".split(),
+    }
 
 
-z4_covers = define_func_covers("5 6 7 8 9 10 11 12".split())
-# z3_covers = define_func_covers("1 2 3 4 9 10 11 12".split())
-# z2_covers = define_func_covers("0 3 4 7 8 11 12 15".split())
-# z1_covers = define_func_covers("2 4 7 9 10 14".split())
+z_covers = []
+total_combinations = 1
+
+for z in raw_z_data:
+    z_cover = define_func_covers(raw_z_data[z])
+    cover_count = math.log10(len(z_cover))
+    print(f"LogCount of z{z} cover:", cover_count, "\n")
+    total_combinations += cover_count
+    z_covers.append(z_cover)
+print()
+    
+
+min_cost = 1000
+min_configuration = tuple()
+z_count = len(raw_z_data)
+
+active_count = 0
+for func_configuration in product(*z_covers):
+    active_count += 1
+    group_config = set(group for func in func_configuration for group in func)
+    # print(func_configuration)
+    # print(group_config)
+    if active_count%1000000 == 0:
+        print("Done", "{:.2f}".format(math.log10(active_count)), "out of", "{:.2f}".format(total_combinations))
+    LE_cost = z_count + len(group_config)
+    if LE_cost < min_cost:
+        min_cost = LE_cost
+        min_configuration = func_configuration
+        print("Current best cost:", LE_cost)
+        
+
+print("min LE cost:", min_cost)
+print("Used groups:")
+for group in min_configuration:
+    print(group)
